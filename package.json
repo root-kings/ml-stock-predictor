@@ -1,0 +1,15 @@
+{
+  "name": "stock-trading",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "krushn",
+  "license": "MIT",
+  "dependencies": {
+    "brain.js": "^1.6.1",
+    "node-csv": "^0.1.2"
+  }
+}
