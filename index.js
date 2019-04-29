@@ -1,10 +1,12 @@
 var csv = require('node-csv').createParser()
 var brain = require('brain.js')
+const fs  = require('fs')
+
+
+
 var processedData = []
 
-function avg(a, b) {
-	return (a + b) / 2
-}
+
 
 async function processTheData() {
 	await csv.mapFile('data/ICICIBANK.NS.csv', function(err, data) {
@@ -15,7 +17,7 @@ async function processTheData() {
 				high: parseFloat(day.High),
 				low: parseFloat(day.Low),
 				close: parseFloat(day.Close),
-				// average: avg(parseFloat(day.High), parseFloat(day.Low))
+				
 			}
 
 			processedData.push(processedItem)
@@ -59,22 +61,50 @@ function scaleUp(step) {
 function predictTheFuture() {
 	const scaledData = processedData.map(scaleDown)
 
-	const trainingData = [scaledData.slice(0, 30), scaledData.slice(30, 60), scaledData.slice(60, 90), scaledData.slice(90, 120)]
+	
+	// const trainingData = []
+	const trainingData = [scaledData.slice(0, 30), scaledData.slice(30, 60), scaledData.slice(60, 90), scaledData.slice(90, 120),scaledData.slice(120, 150),scaledData.slice(150, 180)]
+	
+	// for(let i = 0; i< scaledData.length % 30; i++){
+	// 	trainingData.push(scaledData.slice(30*i, 30*(i+1)))
+	// }
 
-	// console.log(trainingData)
 
-	const net = new brain.recurrent.LSTMTimeStep({
+	// [scaledData.slice(0, 30), scaledData.slice(30, 60), scaledData.slice(60, 90), scaledData.slice(90, 120)]
+
+	console.log('training set:' , trainingData.length , trainingData[0].length)
+
+	let netopts = {
 		inputSize: 4,
-		hiddenLayers: [8, 8, 8, 8],
+		hiddenLayers: [8, 16, 12, 8],
 		outputSize: 4
-	})
+	}
 
-	net.train(trainingData, {
-		learningRate: 0.05,
+	const net = new brain.recurrent.LSTMTimeStep(netopts)
 
+	let trainopts = {
+		learningRate: 0.005,
 		errorThresh: 0.03,
+		// iterations: 400,
 		log: stats => console.log(stats)
-	})
+	}
 
-	console.log('Predicted:', scaleUp(net.run(trainingData[0])), 'Actual:', scaleUp(trainingData[1][0]))
+	net.train(trainingData, trainopts)
+
+	let trainedNet = net.toJSON();
+
+	fs.writeFileSync(__dirname+`/training/${trainingData.length * trainingData[0].length}_${netopts.hiddenLayers}_${trainopts.learningRate}_${trainopts.errorThresh}.json`, JSON.stringify(trainedNet), 'utf8');
+
+	let fore = net.forecast(trainingData[0], 10).map(scaleUp)
+	let act = trainingData[1].slice(0,10).map(scaleUp)
+
+	let diff = []
+
+	for (let i=0;i<10;i++){
+		diff.push(Math.abs(fore[i].close - act[i].close))
+	}
+
+	// console.log('Predicted:', scaleUp(net.run(trainingData[0])), 'Actual:', scaleUp(trainingData[1][0]))
+
+	console.log(diff)
 }

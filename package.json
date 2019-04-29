@@ -9,7 +9,10 @@
   "author": "krushn",
   "license": "MIT",
   "dependencies": {
+    "async": "^2.6.2",
     "brain.js": "^1.6.1",
+    "csv": "^5.1.1",
+    "csv-parser": "^2.2.0",
     "node-csv": "^0.1.2"
   }
 }
