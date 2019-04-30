@@ -1,0 +1,21 @@
+{
+	"network": {
+		"inputSize": 4,
+		"hiddenLayers": [8, 8],
+        "outputSize": 4,
+        "JSONFileName": "",
+        "SVGFileName": ""
+	},
+	"train": {
+        "datasetName": "",
+		"iterations": 20000,
+		"errorThresh": 0.005,
+		"log": false,
+		"logPeriod": 10,
+		"learningRate": 0.3,
+		"momentum": 0.1,
+		"callback": null,
+		"callbackPeriod": 10,
+		"timeout": null
+	}
+}
